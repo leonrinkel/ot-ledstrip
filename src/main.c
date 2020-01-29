@@ -110,8 +110,8 @@ static void thread_instance_init(void)
     thread_configuration_t thread_configuration =
     {
         .radio_mode        = THREAD_RADIO_MODE_RX_ON_WHEN_IDLE,
-        .autocommissioning = false,
-        .autostart_disable = true,
+        .autocommissioning = true,
+        .autostart_disable = false,
     };
 
     thread_init(&thread_configuration);
