@@ -1,0 +1,19 @@
+{
+    "folders": [
+        {
+            "name": "pca10056/blank",
+            "path": "targets/pca10056/blank"
+        },
+        {
+            "name": "pca10059/mbr",
+            "path": "targets/pca10059/mbr"
+        },
+        {
+            "name": "pca10100/blank",
+            "path": "targets/pca10100/blank"
+        },
+        {
+            "path": "."
+        }
+    ]
+}

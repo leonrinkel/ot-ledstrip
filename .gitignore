@@ -1,0 +1,6 @@
+# dependencies
+/sdk/*
+/tools/*
+
+# build output
+/targets/*/*/armgcc/_build
