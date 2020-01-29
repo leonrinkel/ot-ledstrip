@@ -53,6 +53,7 @@
 #include "nrf_log.h"
 #include "nrf_log_default_backends.h"
 
+#include "thread_coap_utils.h"
 #include "thread_utils.h"
 
 #include <openthread/thread.h>
@@ -60,12 +61,40 @@
 #define SCHED_QUEUE_SIZE      32                              /**< Maximum number of events in the scheduler queue. */
 #define SCHED_EVENT_DATA_SIZE APP_TIMER_SCHED_EVENT_DATA_SIZE /**< Maximum app_scheduler event size. */
 
+
+static void bsp_event_handler(bsp_event_t event)
+{
+    switch(event)
+    {
+        default:
+            return;
+    }
+}
+
+
 /***************************************************************************************************
  * @section State
  **************************************************************************************************/
 
 static void thread_state_changed_callback(uint32_t flags, void * p_context)
 {
+    if (flags & OT_CHANGED_THREAD_ROLE)
+    {
+        switch (otThreadGetDeviceRole(p_context))
+        {
+            case OT_DEVICE_ROLE_CHILD:
+            case OT_DEVICE_ROLE_ROUTER:
+            case OT_DEVICE_ROLE_LEADER:
+                break;
+
+            case OT_DEVICE_ROLE_DISABLED:
+            case OT_DEVICE_ROLE_DETACHED:
+            default:
+                thread_coap_utils_provisioning_enable_set(false);
+                break;
+        }
+    }
+
     NRF_LOG_INFO("State changed! Flags: 0x%08x Current role: %d\r\n",
                  flags, otThreadGetDeviceRole(p_context));
 }
@@ -83,15 +112,6 @@ static void timer_init(void)
 }
 
 
-/**@brief Function for initializing the LEDs.
- */
-static void leds_init(void)
-{
-    LEDS_CONFIGURE(LEDS_MASK);
-    LEDS_OFF(LEDS_MASK);
-}
-
-
 /**@brief Function for initializing the nrf log module.
  */
 static void log_init(void)
@@ -100,6 +120,18 @@ static void log_init(void)
     APP_ERROR_CHECK(err_code);
 
     NRF_LOG_DEFAULT_BACKENDS_INIT();
+}
+
+
+/**@brief Function for initializing the Thread Board Support Package.
+ */
+static void thread_bsp_init(void)
+{
+    uint32_t error_code = bsp_init(BSP_INIT_LEDS, bsp_event_handler);
+    APP_ERROR_CHECK(error_code);
+
+    error_code = bsp_thread_init(thread_ot_instance_get());
+    APP_ERROR_CHECK(error_code);
 }
 
 
@@ -120,6 +152,21 @@ static void thread_instance_init(void)
 
     uint32_t err_code = bsp_thread_init(thread_ot_instance_get());
     APP_ERROR_CHECK(err_code);
+}
+
+
+/**@brief Function for initializing the Constrained Application Protocol Module.
+ */
+static void thread_coap_init(void)
+{
+    thread_coap_utils_configuration_t thread_coap_configuration =
+    {
+        .coap_server_enabled               = true,
+        .coap_client_enabled               = false,
+        .configurable_led_blinking_enabled = false,
+    };
+
+    thread_coap_utils_init(&thread_coap_configuration);
 }
 
 
@@ -149,14 +196,13 @@ int main(int argc, char *argv[])
     log_init();
     scheduler_init();
     timer_init();
-    leds_init();
-
-    uint32_t err_code = bsp_init(BSP_INIT_LEDS, NULL);
-    APP_ERROR_CHECK(err_code);
 
     while (true)
     {
+        // Initialize the Thread stack.
         thread_instance_init();
+        thread_coap_init();
+        thread_bsp_init();
 
         while (!thread_soft_reset_was_requested())
         {

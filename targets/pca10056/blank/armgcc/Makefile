@@ -67,6 +67,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/utf_converter/utf.c \
   $(SDK_ROOT)/components/thread/utils/thread_utils.c \
   $(PROJ_DIR)/main.c \
+  $(PROJ_DIR)/thread_coap_utils.c \
 
 # Include folders common to all targets
 INC_FOLDERS += \
