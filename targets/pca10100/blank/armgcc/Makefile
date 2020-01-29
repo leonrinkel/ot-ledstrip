@@ -66,8 +66,10 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52833.c \
   $(SDK_ROOT)/external/utf_converter/utf.c \
   $(SDK_ROOT)/components/thread/utils/thread_utils.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_pwm.c \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/thread_coap_utils.c \
+  $(PROJ_DIR)/ledstrip_drv.c \
 
 # Include folders common to all targets
 INC_FOLDERS += \
@@ -130,8 +132,8 @@ LIB_FILES += \
   $(SDK_ROOT)/external/openthread/lib/nrf52833/gcc/libopenthread-platform-utils.a \
   $(SDK_ROOT)/external/openthread/lib/nrf52833/gcc/libopenthread-ftd.a \
 
-# Optimization flags
-OPT = -O3 -g3
+# Debug flags
+OPT = -g3
 # Uncomment the line below to enable link time optimization
 #OPT += -flto
 

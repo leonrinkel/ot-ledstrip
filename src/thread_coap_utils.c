@@ -52,6 +52,9 @@
 #include <openthread/thread.h>
 #include <openthread/platform/alarm-milli.h>
 
+#include "ledstrip.h"
+#include "ledstrip_drv.h"
+
 #define RESPONSE_POLL_PERIOD     100
 #define PROVISIONING_EXPIRY_TIME 5000
 #define LED_INTERVAL             100
@@ -165,14 +168,24 @@ static void poll_period_restore(void)
 
 static void light_changed_default(thread_coap_utils_light_command_t light_command)
 {
+    ret_code_t ret_code;
+
     switch (light_command)
     {
         case THREAD_COAP_UTILS_LIGHT_CMD_ON:
             LEDS_ON(BSP_LED_3_MASK);
+
+            ret_code = ledstrip_rgb(&ledstrip, 0xff, 0xff, 0xff);
+            APP_ERROR_CHECK(ret_code);
+
             break;
 
         case THREAD_COAP_UTILS_LIGHT_CMD_OFF:
             LEDS_OFF(BSP_LED_3_MASK);
+
+            ret_code = ledstrip_rgb(&ledstrip, 0x00, 0x00, 0x00);
+            APP_ERROR_CHECK(ret_code);
+
             break;
 
         case THREAD_COAP_UTILS_LIGHT_CMD_TOGGLE:

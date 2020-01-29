@@ -49,6 +49,7 @@
 #include "app_scheduler.h"
 #include "app_timer.h"
 #include "bsp_thread.h"
+#include "mem_manager.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log.h"
 #include "nrf_log_default_backends.h"
@@ -57,6 +58,9 @@
 #include "thread_utils.h"
 
 #include <openthread/thread.h>
+
+#include "ledstrip.h"
+#include "ledstrip_drv.h"
 
 #define SCHED_QUEUE_SIZE      32                              /**< Maximum number of events in the scheduler queue. */
 #define SCHED_EVENT_DATA_SIZE APP_TIMER_SCHED_EVENT_DATA_SIZE /**< Maximum app_scheduler event size. */
@@ -187,15 +191,35 @@ static void scheduler_init(void)
     APP_SCHED_INIT(SCHED_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 }
 
+
+static void mem_manager_init(void)
+{
+    ret_code_t ret_code = nrf_mem_init();
+    APP_ERROR_CHECK(ret_code);
+}
+
+
 /***************************************************************************************************
  * @section Main
  **************************************************************************************************/
 
 int main(int argc, char *argv[])
 {
+    ret_code_t ret_code;
+
     log_init();
     scheduler_init();
     timer_init();
+    mem_manager_init();
+
+    ledstrip_conf_t ledstrip_conf = {
+        .num_leds     = 30,
+        .output_pin   = 31,
+        .pwm_instance = NRF_DRV_PWM_INSTANCE(0)
+    };
+
+    ret_code = ledstrip_init(&ledstrip, &ledstrip_conf);
+    APP_ERROR_CHECK(ret_code);
 
     while (true)
     {
