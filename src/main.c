@@ -213,8 +213,8 @@ int main(int argc, char *argv[])
     mem_manager_init();
 
     ledstrip_conf_t ledstrip_conf = {
-        .num_leds     = 30,
-        .output_pin   = 31,
+        .num_leds     = LEDSTRIP_NUM_LEDS,
+        .output_pin   = LEDSTRIP_OUTPUT_PIN,
         .pwm_instance = NRF_DRV_PWM_INSTANCE(0)
     };
 
