@@ -32,3 +32,7 @@ $ screen /dev/*somedevice* 115200
 ```
 
 The whole thing is work in progress so don't expect it to work right away. It's more like an inspiration how you could build your own smart home. Feel free to contribute or open issues.
+
+# Hardware
+
+I'm using nRF52840 dongles (also known as PCA10059). They require an additional logic level shifter to be used with the SK6812 leds.
