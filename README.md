@@ -4,7 +4,7 @@
 
 This is a custom application for Nordic Semiconductors OpenThread capable ICs, like the nRF52840, with the purpose of wirelessly controlling RGB LED strips.
 
-It works by joining or forming a specified OpenThread network and then exposing a COAP server to the network. At the moment only one COAP resource for turning the strip on or off is implemented. Resources like `/brightness`, `/rgb` or `/hue` will follow soon. Other Thread nodes on the same network can then write to these resources to control the LED strip.
+It works by joining or forming a specified OpenThread network and then exposing a COAP server to the network. At the moment only one COAP resource (`PUT /rgb`) is implemented. Resources like `/brightness`, `/rgb` or `/hue` might follow soon. Other Thread nodes on the same network can then write to these resources to control the LED strip.
 
 It includes a simple PWM driver for SK6812 or compatible LEDs (also known as Adafruit NeoPixels).
 
@@ -29,6 +29,14 @@ $ screen /dev/*somedevice* 115200
 > dataset masterkey *somemasterkey*
 > dataset commit active
 > thread start
+```
+
+Using `coap-client` on Linux one can then write RGB hex values to the `/rgb` resource to change the color of the led strip like in the following.
+
+```sh
+$ coap-client -m put coap://[*someip*%wpan0]:5683/rgb -e ff0000 # red
+$ coap-client -m put coap://[*someip*%wpan0]:5683/rgb -e 00ff00 # green
+$ coap-client -m put coap://[*someip*%wpan0]:5683/rgb -e 0000ff # blue
 ```
 
 The whole thing is work in progress so don't expect it to work right away. It's more like an inspiration how you could build your own smart home. Feel free to contribute or open issues.
