@@ -8,6 +8,7 @@ typedef struct {
     uint8_t       num_leds;
     nrf_drv_pwm_t pwm_instance;
     uint16_t*     p_pwm_sequence_values;
+    uint32_t      color;
 } ledstrip_t;
 
 typedef struct {
@@ -21,11 +22,9 @@ ret_code_t ledstrip_init(
     ledstrip_conf_t* p_ledstrip_conf
 );
 
-ret_code_t ledstrip_rgb(
+ret_code_t ledstrip_set_rgbhex(
     ledstrip_t* p_ledstrip,
-    uint8_t     r,
-    uint8_t     g,
-    uint8_t     b
+    const char* rgbhex
 );
 
 #endif /* LEDSTRIP_DRV_H__ */

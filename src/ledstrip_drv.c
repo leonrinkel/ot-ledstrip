@@ -1,5 +1,7 @@
 #include "ledstrip_drv.h"
 
+#include <stdlib.h>
+
 #include "mem_manager.h"
 
 #define BITS_PER_LED 24
@@ -78,12 +80,11 @@ ret_code_t ledstrip_init(
 
 }
 
-ret_code_t ledstrip_rgb(
-    ledstrip_t* p_ledstrip,
-    uint8_t     r,
-    uint8_t     g,
-    uint8_t     b
-) {
+ret_code_t ledstrip_show(ledstrip_t* p_ledstrip) {
+
+    uint8_t r = (p_ledstrip->color & (0xff0000)) >> 16;
+    uint8_t g = (p_ledstrip->color & (0x00ff00)) >>  8;
+    uint8_t b = (p_ledstrip->color & (0x0000ff)) >>  0;
 
     for (int i = 0; i < p_ledstrip->num_leds; i++) {
         for (int j = 0; j < 8; j++) {
@@ -109,4 +110,12 @@ ret_code_t ledstrip_rgb(
     return nrfx_pwm_simple_playback(&p_ledstrip->pwm_instance,
         &pwm_sequence, 1, NRFX_PWM_FLAG_STOP);
 
+}
+
+ret_code_t ledstrip_set_rgbhex(
+    ledstrip_t* p_ledstrip,
+    const char* rgbhex
+) {
+    p_ledstrip->color = (uint32_t) strtoul(rgbhex, NULL, 16);
+    return ledstrip_show(p_ledstrip);
 }

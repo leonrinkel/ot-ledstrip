@@ -69,6 +69,7 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_pwm.c \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/thread_coap_utils.c \
+  $(PROJ_DIR)/thread/coap/rgb_resource.c \
   $(PROJ_DIR)/ledstrip_drv.c \
 
 # Include folders common to all targets

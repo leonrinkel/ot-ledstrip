@@ -47,19 +47,6 @@
 #include "thread_utils.h"
 
 
-/**@brief Enumeration describing light commands. */
-typedef enum
-{
-    THREAD_COAP_UTILS_LIGHT_CMD_OFF = '0',
-    THREAD_COAP_UTILS_LIGHT_CMD_ON
-} thread_coap_utils_light_command_t;
-
-
-/**@brief Type definition of the function used to handle light resource change.
- */
-typedef void (*thread_coap_utils_light_command_handler_t)(thread_coap_utils_light_command_t light_state);
-
-
 /***************************************************************************************************
  * @section CoAP utils core functions.
  **************************************************************************************************/

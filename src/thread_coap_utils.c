@@ -52,25 +52,7 @@
 #include <openthread/thread.h>
 #include <openthread/platform/alarm-milli.h>
 
-#include "ledstrip.h"
-#include "ledstrip_drv.h"
-
-
-static thread_coap_utils_light_command_handler_t m_light_command_handler;
-
-
-/**@brief Forward declarations of CoAP resources handlers. */
-static void light_request_handler(void *, otMessage *, const otMessageInfo *);
-
-
-/**@brief Definition of CoAP resources for light. */
-static otCoapResource m_light_resource =
-{
-    .mUriPath = "light",
-    .mHandler = light_request_handler,
-    .mContext = NULL,
-    .mNext    = NULL
-};
+#include "thread/coap/rgb_resource.h"
 
 
 static void coap_default_handler(void                * p_context,
@@ -85,105 +67,6 @@ static void coap_default_handler(void                * p_context,
 }
 
 
-static void light_changed_default(thread_coap_utils_light_command_t light_command)
-{
-    ret_code_t ret_code;
-
-    switch (light_command)
-    {
-        case THREAD_COAP_UTILS_LIGHT_CMD_ON:
-            LEDS_ON(BSP_LED_3_MASK);
-
-            ret_code = ledstrip_rgb(&ledstrip, 0xff, 0xff, 0xff);
-            APP_ERROR_CHECK(ret_code);
-
-            break;
-
-        case THREAD_COAP_UTILS_LIGHT_CMD_OFF:
-            LEDS_OFF(BSP_LED_3_MASK);
-
-            ret_code = ledstrip_rgb(&ledstrip, 0x00, 0x00, 0x00);
-            APP_ERROR_CHECK(ret_code);
-
-            break;
-
-        default:
-            break;
-    }
-}
-
-
-static void light_response_send(otMessage           * p_request_message,
-                                const otMessageInfo * p_message_info)
-{
-    otError      error = OT_ERROR_NO_BUFS;
-    otMessage  * p_response;
-    otInstance * p_instance = thread_ot_instance_get();
-
-    do
-    {
-        p_response = otCoapNewMessage(p_instance, NULL);
-        if (p_response == NULL)
-        {
-            break;
-        }
-
-        error = otCoapMessageInitResponse(p_response,
-                                          p_request_message,
-                                          OT_COAP_TYPE_ACKNOWLEDGMENT,
-                                          OT_COAP_CODE_CHANGED);
-
-        if (error != OT_ERROR_NONE)
-        {
-            break;
-        }
-
-        error = otCoapSendResponse(p_instance, p_response, p_message_info);
-
-    } while (false);
-
-    if ((error != OT_ERROR_NONE) && (p_response != NULL))
-    {
-        otMessageFree(p_response);
-    }
-}
-
-
-static void light_request_handler(void                * p_context,
-                                  otMessage           * p_message,
-                                  const otMessageInfo * p_message_info)
-{
-    uint8_t command;
-
-    do
-    {
-        if (otCoapMessageGetType(p_message) != OT_COAP_TYPE_CONFIRMABLE &&
-            otCoapMessageGetType(p_message) != OT_COAP_TYPE_NON_CONFIRMABLE)
-        {
-            break;
-        }
-
-        if (otCoapMessageGetCode(p_message) != OT_COAP_CODE_PUT)
-        {
-            break;
-        }
-
-        if (otMessageRead(p_message, otMessageGetOffset(p_message), &command, 1) != 1)
-        {
-            NRF_LOG_INFO("light handler - missing command\r\n");
-        }
-
-        m_light_command_handler((thread_coap_utils_light_command_t)command);
-
-        if (otCoapMessageGetType(p_message) == OT_COAP_TYPE_CONFIRMABLE)
-        {
-            light_response_send(p_message, p_message_info);
-        }
-
-    } while (false);
-}
-
-
 void thread_coap_utils_init(void)
 {
     otInstance * p_instance = thread_ot_instance_get();
@@ -193,14 +76,7 @@ void thread_coap_utils_init(void)
 
     otCoapSetDefaultHandler(p_instance, coap_default_handler, NULL);
 
-    m_light_command_handler = light_changed_default;
-
-    LEDS_CONFIGURE(LEDS_MASK);
-    LEDS_OFF(LEDS_MASK);
-
-    m_light_resource.mContext = p_instance;
-
-    error = otCoapAddResource(p_instance, &m_light_resource);
+    error = otCoapAddResource(p_instance, &coap_rgb_resource);
     ASSERT(error == OT_ERROR_NONE);
 }
 
@@ -214,7 +90,5 @@ void thread_coap_utils_deinit(void)
 
     otCoapSetDefaultHandler(p_instance, NULL, NULL);
 
-    m_light_resource.mContext = NULL;
-
-    otCoapRemoveResource(p_instance, &m_light_resource);
+    otCoapRemoveResource(p_instance, &coap_rgb_resource);
 }
