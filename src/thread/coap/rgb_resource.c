@@ -68,9 +68,6 @@ static void coap_rgb_put_handler(
             return;
         }
 
-        otCoapMessageSetPayloadMarker(p_response);
-        otMessageAppend(p_response, rgbhex, 6);
-
         error = otCoapSendResponse(p_instance,
             p_response, p_message_info);
         if (error != OT_ERROR_NONE) {
