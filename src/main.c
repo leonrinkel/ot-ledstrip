@@ -82,23 +82,6 @@ static void bsp_event_handler(bsp_event_t event)
 
 static void thread_state_changed_callback(uint32_t flags, void * p_context)
 {
-    if (flags & OT_CHANGED_THREAD_ROLE)
-    {
-        switch (otThreadGetDeviceRole(p_context))
-        {
-            case OT_DEVICE_ROLE_CHILD:
-            case OT_DEVICE_ROLE_ROUTER:
-            case OT_DEVICE_ROLE_LEADER:
-                break;
-
-            case OT_DEVICE_ROLE_DISABLED:
-            case OT_DEVICE_ROLE_DETACHED:
-            default:
-                thread_coap_utils_provisioning_enable_set(false);
-                break;
-        }
-    }
-
     NRF_LOG_INFO("State changed! Flags: 0x%08x Current role: %d\r\n",
                  flags, otThreadGetDeviceRole(p_context));
 }
@@ -159,21 +142,6 @@ static void thread_instance_init(void)
 }
 
 
-/**@brief Function for initializing the Constrained Application Protocol Module.
- */
-static void thread_coap_init(void)
-{
-    thread_coap_utils_configuration_t thread_coap_configuration =
-    {
-        .coap_server_enabled               = true,
-        .coap_client_enabled               = false,
-        .configurable_led_blinking_enabled = false,
-    };
-
-    thread_coap_utils_init(&thread_coap_configuration);
-}
-
-
 /**@brief Function for deinitializing the Thread Stack.
  *
  */
@@ -225,7 +193,7 @@ int main(int argc, char *argv[])
     {
         // Initialize the Thread stack.
         thread_instance_init();
-        thread_coap_init();
+        thread_coap_utils_init();
         thread_bsp_init();
 
         while (!thread_soft_reset_was_requested())
